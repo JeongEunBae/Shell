@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <setjmp.h>
 
 #define BUFSIZE 256
@@ -20,6 +21,8 @@ pid_t pid;
 int getargs(char *cmd, char **argv);
 void handler_SIGINT(int signo, pid_t pid);
 void handler_SIGQUIT(int signo);
+
+void handler(int narg, char **argv);
 
 void pwd();
 void ls(int narg, char **argv);
@@ -37,6 +40,8 @@ void redirection(int narg, char **argv);
 void launch(int narg, char **argv);
 void pipe_launch(int narg, char **argv);
 
+char path[BUFSIZE];
+
 int main() 
 {
 	signal(SIGINT, handler_SIGINT);
@@ -46,19 +51,22 @@ int main()
 	char * argv[50];
 	int narg;
 	pid_t pid;
-	int i = 0;
-    while (1)
-    {
 
-        char *argv[50] = {'\0'} ;
-        printf("shell> ");
-	    gets(buf);
+	while (1)
+    	{
+		char *argv[50] = {'\0'};
+		
+		getcwd(path, BUFSIZE);
+        	printf("%s$ ", path);
+        	gets(buf);
 
-        if(!strcmp(buf,"exit") || !strcmp(buf,"exit;"))
-            break;
+        if(!strcmp(buf, "exit")) {
+			printf("finish CJshell :(\n");
+			exit(0);
+	}
         
         else if(!strcmp(buf,"") || !strcmp(buf,"\t")) 
-            continue;
+            	continue;
         
         narg = getargs(buf, argv);
         handler(narg, argv);
